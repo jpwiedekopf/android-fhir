@@ -18,7 +18,6 @@ package com.google.android.fhir.datacapture
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
-import ca.uhn.fhir.context.FhirContext
 import com.google.android.fhir.datacapture.enablement.EnablementEvaluator
 import com.google.android.fhir.datacapture.enablement.QuestionnaireItemWithResponse
 import com.google.android.fhir.datacapture.views.QuestionnaireItemViewItem
@@ -35,7 +34,7 @@ internal class QuestionnaireViewModel(state: SavedStateHandle) : ViewModel() {
   init {
     val questionnaireJson: String = state[QuestionnaireFragment.BUNDLE_KEY_QUESTIONNAIRE]!!
     questionnaire =
-      FhirContext.forR4().newJsonParser().parseResource(questionnaireJson) as Questionnaire
+      FhirContextWrapper.fhirContext.newJsonParser().parseResource(questionnaireJson) as Questionnaire
   }
 
   /** The current questionnaire response as questions are being answered. */
@@ -46,7 +45,7 @@ internal class QuestionnaireViewModel(state: SavedStateHandle) : ViewModel() {
       state[QuestionnaireFragment.BUNDLE_KEY_QUESTIONNAIRE_RESPONSE]
     if (questionnaireJsonResponseString != null) {
       questionnaireResponse =
-        FhirContext.forR4().newJsonParser().parseResource(questionnaireJsonResponseString) as
+        FhirContextWrapper.fhirContext.newJsonParser().parseResource(questionnaireJsonResponseString) as
           QuestionnaireResponse
       validateQuestionnaireResponseItems(questionnaire.item, questionnaireResponse.item)
     } else {
