@@ -48,9 +48,18 @@ internal object QuestionnaireItemDateTimePickerViewHolderFactory :
         dateInputEditText = itemView.findViewById(R.id.dateInputEditText)
         // Disable direct text input to only allow input from the date picker dialog
         dateInputEditText.keyListener = null
-        dateInputEditText.setOnFocusChangeListener { _: View, hasFocus: Boolean ->
+        dateInputEditText.setOnFocusChangeListener { view: View, hasFocus: Boolean ->
           // Do not show the date picker dialog when losing focus.
-          if (!hasFocus) return@setOnFocusChangeListener
+          if (!hasFocus) {
+            applyValidationResult(
+              QuestionnaireResponseItemValidator.validate(
+                questionnaireItemViewItem.questionnaireItem,
+                questionnaireItemViewItem.questionnaireResponseItem,
+                view.context
+              )
+            )
+            return@setOnFocusChangeListener
+          }
 
           // The application is wrapped in a ContextThemeWrapper in QuestionnaireFragment
           // and again in TextInputEditText during layout inflation. As a result, it is
@@ -77,10 +86,10 @@ internal object QuestionnaireItemDateTimePickerViewHolderFactory :
               )
             updateDateTimeInput(localDateTime)
             updateDateTimeAnswer(localDateTime)
+            // Clear focus so that the user can refocus to open the dialog
+            dateInputEditText.clearFocus()
           }
           DatePickerFragment().show(context.supportFragmentManager, DatePickerFragment.TAG)
-          // Clear focus so that the user can refocus to open the dialog
-          textDateQuestion.clearFocus()
         }
 
         textTimeQuestion = itemView.findViewById(R.id.time_question)
@@ -107,10 +116,10 @@ internal object QuestionnaireItemDateTimePickerViewHolderFactory :
               LocalDateTime.of(localDate.year, localDate.month + 1, localDate.day, hour, minute, 0)
             updateDateTimeInput(localDateTime)
             updateDateTimeAnswer(localDateTime)
+            // Clear focus so that the user can refocus to open the dialog
+            timeInputEditText.clearFocus()
           }
           TimePickerFragment().show(context.supportFragmentManager, TimePickerFragment.TAG)
-          // Clear focus so that the user can refocus to open the dialog
-          textTimeQuestion.clearFocus()
         }
       }
 
@@ -157,12 +166,6 @@ internal object QuestionnaireItemDateTimePickerViewHolderFactory :
               )
             )
         questionnaireItemViewItem.questionnaireResponseItemChangedCallback()
-        applyValidationResult(
-          QuestionnaireResponseItemValidator.validate(
-            questionnaireItemViewItem.questionnaireItem,
-            questionnaireItemViewItem.questionnaireResponseItem
-          )
-        )
       }
 
       private fun applyValidationResult(validationResult: ValidationResult) {
